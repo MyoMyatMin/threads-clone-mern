@@ -80,7 +80,7 @@ const followUnFollowUser = async (req, res) => {
     const { id } = req.params;
     const userToModify = await User.findById(id);
     const currentUser = await User.findById(req.user._id);
-    if (id === req.user._id) {
+    if (id === req.user._id.toString()) {
       return res
         .status(400)
         .json({ message: "You cannot follow/unfollow yourself " });
@@ -105,4 +105,39 @@ const followUnFollowUser = async (req, res) => {
     console.log("Error in followUnfollowUser", error.message);
   }
 };
-export { signupUser, loginUser, logoutUser, followUnFollowUser };
+
+const updateUser = async (req, res) => {
+  const { name, email, username, password, profilePic, bio } = req.body;
+  const userID = req.user._id;
+  try {
+    let user = await User.findById(userID);
+    if (!user) {
+      res.status(400).json({ message: "User not found." });
+    }
+
+    if (req.params.id !== userID.toString()) {
+      return res
+        .status(400)
+        .json({ message: "You cannot update other user's profilePic." });
+    }
+
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      user.password = hashedPassword;
+    }
+
+    user.name = name || user.name;
+    user.email = email || user.email;
+    user.username = username || user.username;
+    user.profilePic = name || user.profilePic;
+    user.bio = bio || user.bio;
+
+    user = await user.save();
+    res.status(200).json({ message: "Profile updated successfully.", user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+    console.log("Error in updateUser", error.message);
+  }
+};
+export { signupUser, loginUser, logoutUser, followUnFollowUser, updateUser };
