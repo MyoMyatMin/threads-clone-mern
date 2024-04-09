@@ -9,6 +9,7 @@ import {
   Button,
 } from "@chakra-ui/react";
 import { BsThreeDots } from "react-icons/bs";
+
 import Actions from "../components/Actions";
 import Comment from "../components/Comment";
 export default function PostPage() {
