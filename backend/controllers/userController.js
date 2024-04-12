@@ -5,13 +5,14 @@ import { v2 as cloudinary } from "cloudinary";
 
 const getUserProfile = async (req, res) => {
   const { username } = req.params; //might update later with id
+
   try {
     const user = await User.findOne({ username })
       .select("-password")
       .select("-updatedAt");
 
     if (!user) {
-      res.status(400).json({ error: "User not found." });
+      return res.status(400).json({ error: "User not found." });
     }
 
     res.status(200).json(user);
