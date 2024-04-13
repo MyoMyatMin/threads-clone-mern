@@ -1,6 +1,6 @@
 import User from "../models/userModel.js";
 import Post from "../models/postModels.js";
-
+import { v2 as cloudinary } from "cloudinary";
 const getPost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -18,7 +18,9 @@ const getPost = async (req, res) => {
 
 const createPost = async (req, res) => {
   try {
-    const { postedBy, text, img } = req.body;
+    const { postedBy, text } = req.body;
+
+    let { img } = req.body;
 
     if (!postedBy || !text) {
       return res
@@ -39,6 +41,12 @@ const createPost = async (req, res) => {
       return res
         .status(400)
         .json({ error: `Text must be less than ${maxLength} characters.` });
+    }
+
+    if (img) {
+      const uploadedResponse = await cloudinary.uploader.upload(img);
+
+      img = uploadedResponse.secure_url;
     }
 
     const newPost = new Post({
@@ -85,7 +93,7 @@ const likeUnlikePost = async (req, res) => {
     }
 
     const userLikedPost = post.likes.includes(userID);
-    console.log(userID);
+
     if (userLikedPost) {
       await Post.updateOne({ _id: postID }, { $pull: { likes: userID } });
       res.status(200).json({ message: "Post unliked successfully." });
