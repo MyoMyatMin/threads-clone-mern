@@ -4,12 +4,15 @@ import UserPost from "../components/UserPost";
 import { useParams } from "react-router-dom";
 import useShowToast from "../hooks/useShowToast";
 import { Flex, Spinner } from "@chakra-ui/react";
+import Post from "../components/Post";
 
 export default function UserPage() {
   const [user, setUser] = useState(null);
   const { username } = useParams();
   const showToast = useShowToast();
   const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState([]);
+  const [fetchingPosts, setFetchingPosts] = useState(true);
 
   useEffect(() => {
     const getUser = async () => {
@@ -23,12 +26,29 @@ export default function UserPage() {
         }
         setUser(data);
       } catch (error) {
-        showToast("Error", error, "error");
+        showToast("Error", error.message, "error");
       } finally {
         setLoading(false);
       }
     };
+
+    const getPosts = async () => {
+      try {
+        const res = await fetch(`/api/posts/user/${username}`);
+        const data = await res.json();
+        if (data.error) {
+          showToast("Error", data.error, "error");
+        }
+        setPosts(data);
+      } catch (error) {
+        showToast("Error", error.message, "error");
+        setPosts([]);
+      } finally {
+        setFetchingPosts(false);
+      }
+    };
     getUser();
+    getPosts();
   }, [username, showToast]);
 
   if (!user && loading) {
@@ -48,7 +68,18 @@ export default function UserPage() {
   return (
     <>
       <UserHeader user={user} />
-      <UserPost
+      {!fetchingPosts && posts.length === 0 && (
+        <h1>User has not posted yet.</h1>
+      )}
+      {fetchingPosts && (
+        <Flex justifyContent={"center"}>
+          <Spinner size={"xl"} />
+        </Flex>
+      )}
+      {posts.map((post) => (
+        <Post key={post._id} post={post} postedBy={post.postedBy} />
+      ))}
+      {/* <UserPost
         likes={1200}
         replies={481}
         postImg="/post1.png"
@@ -66,7 +97,7 @@ export default function UserPage() {
         postImg="/post3.png"
         postTitle="I love this guy."
       />
-      <UserPost likes={212} replies={56} postTitle="This is my first post." />
+      <UserPost likes={212} replies={56} postTitle="This is my first post." /> */}
     </>
   );
 }

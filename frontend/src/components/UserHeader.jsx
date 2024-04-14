@@ -26,7 +26,7 @@ function UserHeader({ user }) {
   const currentUser = useRecoilValue(userAtom);
   const [updating, setUpdating] = useState(false);
   const [following, setFollowing] = useState(
-    user.followers.includes(currentUser._id)
+    user.followers.includes(currentUser?._id)
   );
   const copyURL = () => {
     const currentURL = window.location.href;
@@ -68,7 +68,7 @@ function UserHeader({ user }) {
         user.followers.pop();
       } else {
         showToast("Success", `Followed ${user.name}`, "success");
-        user.followers.push(currentUser._id);
+        user.followers.push(currentUser?._id);
       }
     } catch (error) {
       showToast("Error", error.message, "error");
@@ -125,7 +125,7 @@ function UserHeader({ user }) {
           <Button size={"sm"}>Update Profile</Button>
         </Link>
       )}
-      {currentUser._id !== user._id && (
+      {currentUser?._id !== user._id && (
         <Link as={RouterLink} href="/update">
           <Button
             size={"sm"}
