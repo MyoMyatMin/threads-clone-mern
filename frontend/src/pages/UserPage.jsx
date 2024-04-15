@@ -5,33 +5,16 @@ import { useParams } from "react-router-dom";
 import useShowToast from "../hooks/useShowToast";
 import { Flex, Spinner } from "@chakra-ui/react";
 import Post from "../components/Post";
+import useGetUserProfile from "../hooks/useGetUserProfile";
 
 export default function UserPage() {
-  const [user, setUser] = useState(null);
+  const { user, loading } = useGetUserProfile();
   const { username } = useParams();
   const showToast = useShowToast();
-  const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState([]);
   const [fetchingPosts, setFetchingPosts] = useState(true);
 
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        const res = await fetch(`/api/users/profile/${username}`);
-        const data = await res.json();
-
-        if (data.error) {
-          showToast("Error", data.error, "error");
-          return;
-        }
-        setUser(data);
-      } catch (error) {
-        showToast("Error", error.message, "error");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     const getPosts = async () => {
       try {
         const res = await fetch(`/api/posts/user/${username}`);
@@ -47,7 +30,7 @@ export default function UserPage() {
         setFetchingPosts(false);
       }
     };
-    getUser();
+
     getPosts();
   }, [username, showToast]);
 
@@ -77,7 +60,12 @@ export default function UserPage() {
         </Flex>
       )}
       {posts.map((post) => (
-        <Post key={post._id} post={post} postedBy={post.postedBy} />
+        <Post
+          key={post._id}
+          post={post}
+          postedBy={post.postedBy}
+          setPosts={setPosts}
+        />
       ))}
       {/* <UserPost
         likes={1200}

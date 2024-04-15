@@ -9,7 +9,7 @@ import { DeleteIcon } from "@chakra-ui/icons";
 import { useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 
-const Post = ({ post, postedBy }) => {
+const Post = ({ post, postedBy, setPosts }) => {
   const [liked, setLiked] = useState(false);
   const showToast = useShowToast();
   const [user, setUser] = useState(null);
@@ -51,6 +51,7 @@ const Post = ({ post, postedBy }) => {
       }
 
       showToast("Success", "Post deleted", "success");
+      setPosts((prev) => prev.filter((p) => p._id !== post._id));
     } catch (error) {
       showToast("Error", error.message, "error");
     }
