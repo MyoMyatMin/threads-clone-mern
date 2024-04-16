@@ -16,22 +16,26 @@ import useGetUserProfile from "../hooks/useGetUserProfile";
 import useShowToast from "../hooks/useShowToast";
 import { useNavigate, useParams } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
 import { DeleteIcon } from "@chakra-ui/icons";
+import postsAtom from "../atoms/postsAtom";
 
 export default function PostPage() {
   const { user, loading } = useGetUserProfile();
   const { pid } = useParams();
-  const [post, setPost] = useState(null);
+
+  const [posts, setPosts] = useRecoilState(postsAtom);
   const showToast = useShowToast();
   const currentUser = useRecoilValue(userAtom);
   const navigate = useNavigate();
 
+  const currentPost = posts[0];
+
   const handleDeletePost = async () => {
     try {
       if (!window.confirm("Are you sure you want to delete this post?")) return;
-      const res = await fetch(`/api/posts/delete/${post._id}`, {
+      const res = await fetch(`/api/posts/delete/${currentPost._id}`, {
         method: "DELETE",
       });
 
@@ -50,6 +54,7 @@ export default function PostPage() {
 
   useEffect(() => {
     const getPost = async () => {
+      setPosts([]);
       try {
         const res = await fetch(`/api/posts/${pid}`);
         const data = await res.json();
@@ -58,13 +63,13 @@ export default function PostPage() {
           return;
         }
 
-        setPost(data);
+        setPosts([data]);
       } catch (error) {
         showToast("Error", error.message, "error");
       }
     };
     getPost();
-  }, [showToast, pid]);
+  }, [showToast, pid, setPosts]);
 
   if (!user && loading) {
     return (
@@ -74,7 +79,7 @@ export default function PostPage() {
     );
   }
 
-  if (!post) {
+  if (!currentPost) {
     return null;
   }
   return (
@@ -96,7 +101,7 @@ export default function PostPage() {
             textAlign={"right"}
             color={"gray.light"}
           >
-            {formatDistanceToNow(new Date(post.createdAt))} ago
+            {formatDistanceToNow(new Date(currentPost.createdAt))} ago
           </Text>
           {currentUser?._id === user._id && (
             <DeleteIcon
@@ -107,9 +112,9 @@ export default function PostPage() {
           )}
         </Flex>
       </Flex>
-      <Text my={3}>{post.text}</Text>
+      <Text my={3}>{currentPost.text}</Text>
 
-      {post.img && (
+      {currentPost.img && (
         <Box
           position={"relative"}
           borderRadius={6}
@@ -117,12 +122,12 @@ export default function PostPage() {
           border={"1px solid"}
           borderColor={"gray.light"}
         >
-          <Image src={post.img} w="full" />
+          <Image src={currentPost.img} w="full" />
         </Box>
       )}
 
       <Flex gap={3} my={3}>
-        <Actions post={post} />
+        <Actions post={currentPost} />
       </Flex>
 
       <Divider my={4} />
@@ -134,14 +139,17 @@ export default function PostPage() {
         <Button>Get</Button>
       </Flex>
       <Divider my={4} />
-
-      {post.replies.map((reply) => (
+      {currentPost.replies.map((reply, index) => (
         <Comment
-          key={reply._id}
+          key={`${index}-${reply.userId}`}
           reply={reply}
-          lastReply={reply._id === post.replies[post.replies.length - 1]._id}
+          lastReply={
+            reply._id ===
+            currentPost.replies[currentPost.replies.length - 1]._id
+          }
         />
       ))}
+
       {/* <Comment
         comments="Looks really good!"
         createdAt="1d"
