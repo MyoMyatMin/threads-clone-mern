@@ -96,7 +96,7 @@ const MessageContainer = () => {
             />
           ))}
       </Flex>
-      <MessageInput />
+      <MessageInput setMessages={setMessages} />
     </Flex>
   );
 };
