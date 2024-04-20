@@ -1,24 +1,26 @@
 import { Avatar, Flex, Text } from "@chakra-ui/react";
 import React from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { selectedConversationAtom } from "../atoms/messagesAtom";
+import userAtom from "../atoms/userAtom";
 
-const Message = ({ ownMessage }) => {
+const Message = ({ message, ownMessage }) => {
+  const [selectedConversation, setSelectedConversation] = useRecoilState(
+    selectedConversationAtom
+  );
+  const user = useRecoilValue(userAtom);
   return (
     <>
       {ownMessage ? (
         <Flex gap={2} alignSelf={"flex-end"}>
           <Text maxW={"350px"} bg={"blue.400"} p={1} borderRadius={"md"}>
-            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dolore
-            sint obcaecati, minus provident impedit quidem a praesentium libero
-            quo non ex officia nam enim dignissimos, rerum ipsa magni dolorem
-            laboriosam alias pariatur deleniti commodi reprehenderit? Culpa sint
-            quam iusto debitis porro impedit totam placeat eaque molestiae?
-            Quibusdam unde non magnam.
+            {message.text}.
           </Text>
-          <Avatar src="" w="7" h={7} />
+          <Avatar src={user.profilePic} w="7" h={7} />
         </Flex>
       ) : (
         <Flex gap={2}>
-          <Avatar src="" w="7" h={7} />
+          <Avatar src={selectedConversation.userProfilePic} w="7" h={7} />
           <Text
             maxW={"350px"}
             bg={"gray.400"}
@@ -26,12 +28,7 @@ const Message = ({ ownMessage }) => {
             borderRadius={"md"}
             color={"black"}
           >
-            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dolore
-            sint obcaecati, minus provident impedit quidem a praesentium libero
-            quo non ex officia nam enim dignissimos, rerum ipsa magni dolorem
-            laboriosam alias pariatur deleniti commodi reprehenderit? Culpa sint
-            quam iusto debitis porro impedit totam placeat eaque molestiae?
-            Quibusdam unde non magnam.
+            {message.text}
           </Text>
         </Flex>
       )}
