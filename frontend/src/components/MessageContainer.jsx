@@ -25,6 +25,7 @@ const MessageContainer = () => {
   const [messages, setMessages] = useState([]);
   const currentUser = useRecoilValue(userAtom);
   useEffect(() => {
+    if (selectedConversation.mock) return;
     const getMessages = async () => {
       setLoadingMessages(true);
       setMessages([]);

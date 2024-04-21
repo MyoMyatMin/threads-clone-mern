@@ -53,7 +53,9 @@ const Chatpage = () => {
   const handelConversationSearch = async (e) => {
     e.preventDefault();
     setSearchingUser(true);
+
     try {
+      if (searchText.trim() === "") return;
       const res = await fetch(`/api/users/profile/${searchText}`);
       const searchedUser = await res.json();
       if (searchedUser.error) {
@@ -77,6 +79,22 @@ const Chatpage = () => {
           userProfilePic: searchedUser.profilePic,
         });
       }
+      const mockConversation = {
+        mock: true,
+        lastMessage: {
+          text: "",
+          sender: "",
+        },
+        _id: Date.now(),
+        participants: [
+          {
+            _id: searchedUser._id,
+            username: searchedUser.username,
+            profilePic: searchedUser.profilePic,
+          },
+        ],
+      };
+      setConversations((prevConvs) => [...prevConvs, mockConversation]);
     } catch (error) {
       showToast("Error", error.message, "error");
     } finally {
