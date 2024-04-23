@@ -13,7 +13,7 @@ import {
 import React from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
-import { BsCheck2All } from "react-icons/bs";
+import { BsCheck2All, BsFillImageFill } from "react-icons/bs";
 import { selectedConversationAtom } from "../atoms/messagesAtom";
 
 const Conversations = ({ conversation, isOnline }) => {
@@ -68,7 +68,7 @@ const Conversations = ({ conversation, isOnline }) => {
         <Text fontWeight="700" display={"flex"} alignItems={"center"}>
           {user.username} <Image src="verified.png" w={4} h={4} ml={1} />
         </Text>
-        <Text fontSize={"xs"} display={"flex"} alignItems={"center"} gap={1}>
+        <Flex gap={1} display={"flex"} alignItems={"center"}>
           {currentUser._id === lastMessage.sender ? (
             <Box color={lastMessage.seen ? "blue.400" : ""}>
               <BsCheck2All size={16} />
@@ -76,10 +76,12 @@ const Conversations = ({ conversation, isOnline }) => {
           ) : (
             ""
           )}
-          {lastMessage.text.length > 18
-            ? lastMessage.text.substring(0, 18) + "..."
-            : lastMessage.text}
-        </Text>
+          <Text fontSize={"xs"}>
+            {lastMessage.text.length > 18
+              ? lastMessage.text.substring(0, 18) + "..."
+              : lastMessage.text || <BsFillImageFill size={16} />}
+          </Text>
+        </Flex>
       </Stack>
     </Flex>
   );
