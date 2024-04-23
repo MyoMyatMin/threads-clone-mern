@@ -33,7 +33,7 @@ const MessageContainer = () => {
   const messageRef = useRef(null);
 
   useEffect(() => {
-    socket.on("newMessage", (message) => {
+    socket?.on("newMessage", (message) => {
       if (selectedConversation._id === message.conversationId) {
         setMessages((prev) => [...prev, message]);
       }
@@ -54,7 +54,39 @@ const MessageContainer = () => {
       });
     });
     return () => socket.off("newMessage");
-  }, [socket]);
+  }, [socket, selectedConversation, setConversations]);
+
+  useEffect(() => {
+    const lastMessageIsFromOtherUser =
+      messages.length &&
+      messages[messages.length - 1].sender !== currentUser._id;
+    if (lastMessageIsFromOtherUser) {
+      socket.emit("markMessagesAsSeen", {
+        conversationId: selectedConversation._id,
+        userId: selectedConversation.userId,
+      });
+    }
+    socket.on("messagesSeen", ({ conversationId }) => {
+      if (selectedConversation._id === conversationId) {
+        setMessages((prev) => {
+          const updatedMessages = prev.map((message) => {
+            if (!message.seen) {
+              return {
+                ...message,
+                seen: true,
+              };
+            }
+            return message;
+          });
+          return updatedMessages;
+        });
+      }
+    });
+  }, [socket, currentUser._id, messages, selectedConversation]);
+
+  useEffect(() => {
+    messageRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   useEffect(() => {
     if (selectedConversation.mock) return;
@@ -76,11 +108,8 @@ const MessageContainer = () => {
       }
     };
     getMessages();
-  }, [showToast, selectedConversation.userId]);
+  }, [showToast, selectedConversation.userId, selectedConversation.mock]);
 
-  useEffect(() => {
-    messageRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
   return (
     <Flex
       flex={70}
