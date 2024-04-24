@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import UserHeader from "../components/UserHeader";
-import UserPost from "../components/UserPost";
 import { useParams } from "react-router-dom";
 import useShowToast from "../hooks/useShowToast";
 import { Flex, Spinner } from "@chakra-ui/react";
@@ -9,7 +8,7 @@ import useGetUserProfile from "../hooks/useGetUserProfile";
 import { useRecoilState } from "recoil";
 import postsAtom from "../atoms/postsAtom";
 
-export default function UserPage() {
+const UserPage = () => {
   const { user, loading } = useGetUserProfile();
   const { username } = useParams();
   const showToast = useShowToast();
@@ -18,12 +17,12 @@ export default function UserPage() {
 
   useEffect(() => {
     const getPosts = async () => {
+      if (!user) return;
+      setFetchingPosts(true);
       try {
         const res = await fetch(`/api/posts/user/${username}`);
         const data = await res.json();
-        if (data.error) {
-          showToast("Error", data.error, "error");
-        }
+        console.log(data);
         setPosts(data);
       } catch (error) {
         showToast("Error", error.message, "error");
@@ -34,7 +33,7 @@ export default function UserPage() {
     };
 
     getPosts();
-  }, [username, showToast, setPosts]);
+  }, [username, showToast, setPosts, user]);
 
   if (!user && loading) {
     return (
@@ -44,45 +43,26 @@ export default function UserPage() {
     );
   }
 
-  if (!user && !loading) {
-    return <h1>User not found!</h1>;
-  }
-
-  if (!user) return null;
+  if (!user && !loading) return <h1>User not found</h1>;
 
   return (
     <>
       <UserHeader user={user} />
+
       {!fetchingPosts && posts.length === 0 && (
-        <h1>User has not posted yet.</h1>
+        <h1>User does not have posts yet.</h1>
       )}
       {fetchingPosts && (
-        <Flex justifyContent={"center"}>
+        <Flex justifyContent={"center"} my={12}>
           <Spinner size={"xl"} />
         </Flex>
       )}
+
       {posts.map((post) => (
         <Post key={post._id} post={post} postedBy={post.postedBy} />
       ))}
-      {/* <UserPost
-        likes={1200}
-        replies={481}
-        postImg="/post1.png"
-        postTitle="Let's talk about threads"
-      />
-      <UserPost
-        likes={451}
-        replies={12}
-        postImg="/post2.png"
-        postTitle="Nice tutorial."
-      />
-      <UserPost
-        likes={989}
-        replies={321}
-        postImg="/post3.png"
-        postTitle="I love this guy."
-      />
-      <UserPost likes={212} replies={56} postTitle="This is my first post." /> */}
     </>
   );
-}
+};
+
+export default UserPage;

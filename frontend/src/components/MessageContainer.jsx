@@ -95,7 +95,11 @@ const MessageContainer = () => {
   }, [messages]);
 
   useEffect(() => {
-    if (selectedConversation.mock) return;
+    if (selectedConversation.mock) {
+      setLoadingMessages(false);
+      setMessages([]);
+      return;
+    }
     const getMessages = async () => {
       setLoadingMessages(true);
       setMessages([]);
