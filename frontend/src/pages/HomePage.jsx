@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Flex, Button, Spinner } from "@chakra-ui/react";
+import { Flex, Button, Spinner, Box } from "@chakra-ui/react";
 import useShowToast from "../hooks/useShowToast";
 import Post from "../components/Post";
 import { useRecoilState } from "recoil";
 import postsAtom from "../atoms/postsAtom";
+import SuggestedUsers from "../components/SuggestedUsers";
 
 const HomePage = () => {
   const showToast = useShowToast();
@@ -31,20 +32,31 @@ const HomePage = () => {
     getFeedPosts();
   }, [showToast, setPosts]);
   return (
-    <>
-      {!loading && posts.length === 0 && (
-        <h1>Follow some users to see the feed.</h1>
-      )}
-      {loading && (
-        <Flex justifyContent="center">
-          <Spinner size="xl" />
-        </Flex>
-      )}
+    <Flex gap={"10"} alignItems={"flex-start"}>
+      <Box flex={70}>
+        {!loading && posts.length === 0 && (
+          <h1>Follow some users to see the feed.</h1>
+        )}
+        {loading && (
+          <Flex justifyContent="center">
+            <Spinner size="xl" />
+          </Flex>
+        )}
 
-      {posts.map((post) => (
-        <Post key={post._id} post={post} postedBy={post.postedBy} />
-      ))}
-    </>
+        {posts.map((post) => (
+          <Post key={post._id} post={post} postedBy={post.postedBy} />
+        ))}
+      </Box>
+      <Box
+        flex={30}
+        display={{
+          base: "none",
+          md: "block",
+        }}
+      >
+        <SuggestedUsers />
+      </Box>
+    </Flex>
   );
 };
 
