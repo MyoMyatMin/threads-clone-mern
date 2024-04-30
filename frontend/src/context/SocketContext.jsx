@@ -15,7 +15,7 @@ export const SocketContextProvider = ({ children }) => {
   const [onlineUsers, setOnlineUsers] = useState([]);
 
   useEffect(() => {
-    const socket = io("http://localhost:5000", {
+    const socket = io("https://threads-clone-mern.onrender.com", {
       query: {
         userId: user?._id,
       },
